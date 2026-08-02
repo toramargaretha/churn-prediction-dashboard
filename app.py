@@ -11,11 +11,11 @@ st.set_page_config(
     layout="wide"
 )
 
-@st.cache_resource
+@st.cache_resource(ttl="1h")
 def load_artifacts():
     model = joblib.load("model_xgboost.pkl")
     scaler = joblib.load("scaler.pkl")
-    encoders = joblib.load("encoder.pkl")   # dictionary per kolom kategorikal
+    encoders = joblib.load("encoder.pkl")
     feature_names = joblib.load("feature_names.pkl")
     return model, scaler, encoders, feature_names
 
