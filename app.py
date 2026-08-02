@@ -5,11 +5,13 @@ import joblib
 import shap
 import matplotlib.pyplot as plt
 
+
 st.set_page_config(
     page_title="Prediksi Customer Churn E-Commerce",
     page_icon="🛒",
     layout="wide"
 )
+
 
 @st.cache_resource(ttl="1h")
 def load_artifacts():
@@ -17,9 +19,12 @@ def load_artifacts():
     scaler = joblib.load("scaler.pkl")
     encoders = joblib.load("encoder.pkl")
     feature_names = joblib.load("feature_names.pkl")
-    return model, scaler, encoders, feature_names
+    explainer = shap.TreeExplainer(model)
+    return model, scaler, encoders, feature_names, explainer
 
-model, scaler, encoders, feature_names = load_artifacts()
+
+model, scaler, encoders, feature_names, explainer = load_artifacts()
+
 
 st.title("Dashboard Prediksi Customer Churn E-Commerce")
 st.markdown(
@@ -29,10 +34,12 @@ st.markdown(
     "faktor pendorong churn."
 )
 
+
 menu = st.sidebar.radio(
     "Navigasi",
     ["Prediksi Individual", "Prediksi Batch (CSV)", "Ringkasan Model"]
 )
+
 
 def segment_risk(prob):
     if prob >= 0.70:
@@ -41,6 +48,7 @@ def segment_risk(prob):
         return "Sedang", "🟡"
     else:
         return "Rendah", "🟢"
+
 
 if menu == "Prediksi Individual":
     st.header("Input Data Pelanggan")
@@ -67,23 +75,24 @@ if menu == "Prediksi Individual":
         price_sensitivity = st.slider("Price Sensitivity Index", 0.0, 1.0, 0.5)
 
     if st.button("Prediksi Churn", type="primary"):
-        loyalty_encoded = encoders['loyalty_member'].transform([loyalty_member])[0]
+        loyalty_map = {"Ya": 1, "Tidak": 0}
+        loyalty_encoded = loyalty_map[loyalty_member]
 
         input_dict = {
-        "account_age_months": account_age,
-        "total_orders": total_orders,
-        "avg_order_value": avg_order_value,
-        "days_since_last_purchase": days_since_last_purchase,
-        "discount_usage_rate": discount_usage_rate,
-        "return_rate": return_rate,
-        "customer_support_tickets": support_tickets,
-        "loyalty_member": loyalty_encoded,
-        "browsing_frequency_per_week": browsing_freq,
-        "cart_abandonment_rate": cart_abandonment_rate,
-        "product_review_score_avg": review_score,
-        "engagement_score": engagement_score,
-        "satisfaction_score": satisfaction_score,
-        "price_sensitivity_index": price_sensitivity,
+            "account_age_months": account_age,
+            "total_orders": total_orders,
+            "avg_order_value": avg_order_value,
+            "days_since_last_purchase": days_since_last_purchase,
+            "discount_usage_rate": discount_usage_rate,
+            "return_rate": return_rate,
+            "customer_support_tickets": support_tickets,
+            "loyalty_member": loyalty_encoded,
+            "browsing_frequency_per_week": browsing_freq,
+            "cart_abandonment_rate": cart_abandonment_rate,
+            "product_review_score_avg": review_score,
+            "engagement_score": engagement_score,
+            "satisfaction_score": satisfaction_score,
+            "price_sensitivity_index": price_sensitivity,
         }
 
         input_df = pd.DataFrame([input_dict])
@@ -104,7 +113,6 @@ if menu == "Prediksi Individual":
 
         with res_col2:
             st.subheader("Interpretasi SHAP")
-            explainer = shap.TreeExplainer(model)
             shap_values = explainer.shap_values(input_scaled)
 
             fig, ax = plt.subplots(figsize=(6, 4))
@@ -128,6 +136,7 @@ if menu == "Prediksi Individual":
             )
         else:
             st.success("Pelanggan ini berisiko rendah untuk churn.")
+
 
 elif menu == "Prediksi Batch (CSV)":
     st.header("Prediksi Massal via Upload CSV")
@@ -171,6 +180,7 @@ elif menu == "Prediksi Batch (CSV)":
             risk_counts = batch_df["Segmentasi_Risiko"].value_counts()
             st.bar_chart(risk_counts)
 
+
 elif menu == "Ringkasan Model":
     st.header("Ringkasan Performa Model")
     st.markdown(
@@ -192,6 +202,7 @@ elif menu == "Ringkasan Model":
         "Model **XGBoost** dipilih sebagai model utama dalam dashboard ini "
         "karena mencatat nilai metrik tertinggi di antara ketiga model yang diuji."
     )
+
 
 st.sidebar.divider()
 st.sidebar.caption(
