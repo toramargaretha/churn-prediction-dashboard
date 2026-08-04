@@ -28,10 +28,9 @@ model, scaler, encoders, feature_names, explainer = load_artifacts()
 
 st.title("Dashboard Prediksi Customer Churn E-Commerce")
 st.markdown(
-    "Dashboard ini menampilkan hasil prediksi customer churn menggunakan "
-    "model **XGBoost** yang telah dilatih dengan SMOTE untuk menangani "
-    "ketidakseimbangan kelas, serta interpretasi **SHAP** untuk menjelaskan "
-    "faktor pendorong churn."
+    "Sistem prediksi risiko churn pelanggan berbasis model **XGBoost**, "
+    "dengan penanganan data tidak seimbang melalui **SMOTE** dan interpretasi "
+    "hasil prediksi menggunakan **SHAP**."
 )
 
 
@@ -161,20 +160,19 @@ if menu == "Prediksi Individual":
             )
         elif risk_label == "Sedang":
             st.info(
-                "Pelanggan ini berisiko sedang. Disarankan pemantauan "
-                "berkala dan program engagement tambahan."
+                "Pelanggan menunjukkan indikasi risiko sedang. Pantau aktivitas "
+                "transaksinya secara berkala dan pertimbangkan program "
+                "keterlibatan tambahan."
             )
         else:
-            st.success("Pelanggan ini berisiko rendah untuk churn.")
-
+            st.success("Pelanggan berada pada kondisi stabil dengan risiko churn yang rendah.")
 
 elif menu == "Prediksi Batch (CSV)":
     st.header("Prediksi Massal via Upload CSV")
     st.markdown(
-        "Unggah file CSV berisi data pelanggan dengan kolom sesuai fitur "
-        "yang digunakan pada model (lihat contoh format di bawah). "
-        "Kolom `loyalty_member` boleh berisi angka (0/1) atau teks "
-        "('Ya'/'Tidak', 'Yes'/'No')."
+    "Unggah data pelanggan dalam format CSV untuk memproses prediksi churn "
+    "secara massal. Format kolom harus sesuai dengan fitur model; kolom "
+    "`loyalty_member` menerima nilai 0/1 maupun teks (Ya/Tidak atau Yes/No)."
     )
 
     uploaded_file = st.file_uploader("Upload file CSV", type=["csv"])
