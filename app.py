@@ -170,11 +170,10 @@ if menu == "Prediksi Individual":
 elif menu == "Prediksi Batch (CSV)":
     st.header("Prediksi Massal via Upload CSV")
     st.markdown(
-    "Unggah data pelanggan dalam format CSV untuk memproses prediksi churn "
-    "secara massal. Format kolom harus sesuai dengan fitur model; kolom "
-    "`loyalty_member` menerima nilai 0/1 maupun teks (Ya/Tidak atau Yes/No)."
+        "Prediksi churn untuk banyak pelanggan sekaligus melalui file CSV. "
+        "Kolom wajib mengikuti struktur fitur model."
     )
-
+    
     uploaded_file = st.file_uploader("Upload file CSV", type=["csv"])
 
     if uploaded_file is not None:
