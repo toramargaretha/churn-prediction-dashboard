@@ -50,6 +50,36 @@ def segment_risk(prob):
         return "Rendah", "🟢"
 
 
+def clean_numeric_input(df, feature_names):
+    """
+    Membersihkan dan menyiapkan DataFrame input agar seluruh kolom
+    fitur bertipe numerik dan siap diproses oleh scaler/model.
+    Mengembalikan (df_bersih, daftar_kolom_bermasalah).
+    """
+    df_clean = df.reindex(columns=feature_names, fill_value=0).copy()
+
+    if "loyalty_member" in df_clean.columns:
+        loyalty_map = {
+            "Ya": 1, "Tidak": 0,
+            "Yes": 1, "No": 0,
+            "ya": 1, "tidak": 0,
+            "yes": 1, "no": 0,
+            1: 1, 0: 0, "1": 1, "0": 0
+        }
+        df_clean["loyalty_member"] = df_clean["loyalty_member"].replace(loyalty_map)
+
+    before_numeric = df_clean.copy()
+    df_clean = df_clean.apply(pd.to_numeric, errors="coerce")
+
+    problem_cols = []
+    for col in df_clean.columns:
+        if df_clean[col].isna().any() and not before_numeric[col].isna().any():
+            problem_cols.append(col)
+
+    df_clean = df_clean.fillna(0)
+    return df_clean, problem_cols
+
+
 if menu == "Prediksi Individual":
     st.header("Input Data Pelanggan")
     col1, col2, col3 = st.columns(3)
@@ -142,7 +172,9 @@ elif menu == "Prediksi Batch (CSV)":
     st.header("Prediksi Massal via Upload CSV")
     st.markdown(
         "Unggah file CSV berisi data pelanggan dengan kolom sesuai fitur "
-        "yang digunakan pada model (lihat contoh format di bawah)."
+        "yang digunakan pada model (lihat contoh format di bawah). "
+        "Kolom `loyalty_member` boleh berisi angka (0/1) atau teks "
+        "('Ya'/'Tidak', 'Yes'/'No')."
     )
 
     uploaded_file = st.file_uploader("Upload file CSV", type=["csv"])
@@ -153,8 +185,27 @@ elif menu == "Prediksi Batch (CSV)":
         st.dataframe(batch_df.head())
 
         if st.button("Jalankan Prediksi Batch"):
-            batch_input = batch_df.reindex(columns=feature_names, fill_value=0)
-            batch_scaled = scaler.transform(batch_input)
+            missing_cols = [c for c in feature_names if c not in batch_df.columns]
+            if missing_cols:
+                st.warning(
+                    f"Kolom berikut tidak ditemukan pada file dan akan diisi "
+                    f"nilai 0 secara otomatis: {missing_cols}"
+                )
+
+            batch_input, problem_cols = clean_numeric_input(batch_df, feature_names)
+
+            if problem_cols:
+                st.error(
+                    f"Kolom berikut mengandung nilai yang tidak bisa diubah "
+                    f"menjadi angka dan telah diisi 0 secara otomatis: {problem_cols}. "
+                    f"Mohon periksa kembali isi file CSV Anda."
+                )
+
+            try:
+                batch_scaled = scaler.transform(batch_input)
+            except Exception as e:
+                st.error(f"Gagal memproses data untuk prediksi. Detail: {e}")
+                st.stop()
 
             probs = model.predict_proba(batch_scaled)[:, 1]
             preds = model.predict(batch_scaled)
