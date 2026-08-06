@@ -245,10 +245,10 @@ elif menu == "Ringkasan Model":
     )
 
     metrics_df = pd.DataFrame({
-        "Model": ["TabNet", "Random Forest", "XGBoost"],
-        "Accuracy": [0.9608, 0.9617, 0.9675],
-        "F1-Score": [0.8753, 0.8821, 0.8976],
-        "AUC-ROC": [0.9910, 0.9915, 0.9930],
+    "Model": ["TabNet", "Random Forest", "XGBoost"],
+    "Accuracy": [0.9558, 0.9617, 0.9667],
+    "F1-Score": [0.8691, 0.8821, 0.8953],
+    "AUC-ROC": [0.9926, 0.9915, 0.9933],
     })
 
     st.dataframe(metrics_df, width="stretch")
