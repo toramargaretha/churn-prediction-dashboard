@@ -94,14 +94,21 @@ if menu == "Prediksi Individual":
         return_rate = st.slider("Return Rate", 0.0, 1.0, 0.1)
         support_tickets = st.number_input("Customer Support Tickets", min_value=0, value=1)
         loyalty_member = st.selectbox("Loyalty Member", ["Ya", "Tidak"])
-        browsing_freq = st.number_input("Browsing Frequency per Week", min_value=0, value=5)
+        # DIPERBAIKI: dijadikan float agar bisa menerima angka desimal (mis. 6.1)
+        browsing_freq = st.number_input(
+            "Browsing Frequency per Week",
+            min_value=0.0, max_value=15.0, value=5.0, step=0.1
+        )
         cart_abandonment_rate = st.slider("Cart Abandonment Rate", 0.0, 1.0, 0.2)
 
     with col3:
         review_score = st.slider("Product Review Score Average", 0.0, 5.0, 3.5)
-        engagement_score = st.slider("Engagement Score", 0.0, 1.0, 0.5)
-        satisfaction_score = st.slider("Satisfaction Score", 0.0, 5.0, 3.5)
-        price_sensitivity = st.slider("Price Sensitivity Index", 0.0, 1.0, 0.5)
+        # DIPERBAIKI: rentang disesuaikan dengan skala asli dataset (0-10), bukan 0-1
+        engagement_score = st.slider("Engagement Score", 0.0, 10.0, 5.0)
+        # DIPERBAIKI: rentang disesuaikan dengan skala asli dataset (0-10), bukan 0-5
+        satisfaction_score = st.slider("Satisfaction Score", 0.0, 10.0, 5.0)
+        # DIPERBAIKI: rentang disesuaikan dengan skala asli dataset (0-10), bukan 0-1
+        price_sensitivity = st.slider("Price Sensitivity Index", 0.0, 10.0, 5.0)
 
     if st.button("Prediksi Churn", type="primary"):
         loyalty_map = {"Ya": 1, "Tidak": 0}
@@ -167,13 +174,14 @@ if menu == "Prediksi Individual":
         else:
             st.success("Pelanggan berada pada kondisi stabil dengan risiko churn yang rendah.")
 
+
 elif menu == "Prediksi Batch (CSV)":
     st.header("Prediksi Massal via Upload CSV")
     st.markdown(
         "Prediksi churn untuk banyak pelanggan sekaligus melalui file CSV. "
         "Kolom wajib mengikuti struktur fitur model."
     )
-    
+
     uploaded_file = st.file_uploader("Upload file CSV", type=["csv"])
 
     if uploaded_file is not None:
@@ -243,7 +251,7 @@ elif menu == "Ringkasan Model":
         "AUC-ROC": [0.9910, 0.9915, 0.9930],
     })
 
-    st.dataframe(metrics_df, use_container_width=True)
+    st.dataframe(metrics_df, width="stretch")
     st.bar_chart(metrics_df.set_index("Model"))
 
     st.markdown(
