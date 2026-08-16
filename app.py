@@ -257,11 +257,20 @@ elif menu == "Ringkasan Model":
     st.dataframe(
         metrics_display_df,
         column_config={
-            column: st.column_config.TextColumn(
-                column,
+            "_index": st.column_config.NumberColumn(
                 alignment="center",
-            )
-            for column in metric_columns
+            ),
+            "Model": st.column_config.TextColumn(
+                "Model",
+                alignment="center",
+            ),
+            **{
+                column: st.column_config.TextColumn(
+                    column,
+                    alignment="center",
+                )
+                for column in metric_columns
+            }
         },
         width="stretch",
     )
