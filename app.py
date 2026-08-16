@@ -94,7 +94,6 @@ if menu == "Prediksi Individual":
         return_rate = st.slider("Return Rate", 0.0, 1.0, 0.1)
         support_tickets = st.number_input("Customer Support Tickets", min_value=0, value=1)
         loyalty_member = st.selectbox("Loyalty Member", ["Ya", "Tidak"])
-        # DIPERBAIKI: dijadikan float agar bisa menerima angka desimal (mis. 6.1)
         browsing_freq = st.number_input(
             "Browsing Frequency per Week",
             min_value=0.0, max_value=15.0, value=5.0, step=0.1
@@ -103,11 +102,8 @@ if menu == "Prediksi Individual":
 
     with col3:
         review_score = st.slider("Product Review Score Average", 0.0, 5.0, 3.5)
-        # DIPERBAIKI: rentang disesuaikan dengan skala asli dataset (0-10), bukan 0-1
         engagement_score = st.slider("Engagement Score", 0.0, 10.0, 5.0)
-        # DIPERBAIKI: rentang disesuaikan dengan skala asli dataset (0-10), bukan 0-5
         satisfaction_score = st.slider("Satisfaction Score", 0.0, 10.0, 5.0)
-        # DIPERBAIKI: rentang disesuaikan dengan skala asli dataset (0-10), bukan 0-1
         price_sensitivity = st.slider("Price Sensitivity Index", 0.0, 10.0, 5.0)
 
     if st.button("Prediksi Churn", type="primary"):
@@ -245,13 +241,30 @@ elif menu == "Ringkasan Model":
     )
 
     metrics_df = pd.DataFrame({
-    "Model": ["TabNet", "Random Forest", "XGBoost"],
-    "Accuracy": [0.9558, 0.9617, 0.9667],
-    "F1-Score": [0.8691, 0.8821, 0.8953],
-    "AUC-ROC": [0.9926, 0.9915, 0.9933],
+        "Model": ["TabNet", "Random Forest", "XGBoost"],
+        "Accuracy": [0.9558, 0.9617, 0.9667],
+        "F1-Score": [0.8691, 0.8821, 0.8953],
+        "AUC-ROC": [0.9926, 0.9915, 0.9933],
     })
 
-    st.dataframe(metrics_df, width="stretch")
+    metrics_display_df = metrics_df.copy()
+    metric_columns = ["Accuracy", "F1-Score", "AUC-ROC"]
+    for column in metric_columns:
+        metrics_display_df[column] = metrics_df[column].map(
+            lambda value: f"{value:.4f} ({value:.2%})"
+        )
+
+    st.dataframe(
+        metrics_display_df,
+        column_config={
+            column: st.column_config.TextColumn(
+                column,
+                alignment="center",
+            )
+            for column in metric_columns
+        },
+        width="stretch",
+    )
     st.bar_chart(metrics_df.set_index("Model"))
 
     st.markdown(
