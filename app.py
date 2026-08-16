@@ -254,26 +254,15 @@ elif menu == "Ringkasan Model":
             lambda value: f"{value:.4f} ({value:.2%})"
         )
 
-    st.dataframe(
-        metrics_display_df,
-        column_config={
-            "_index": st.column_config.NumberColumn(
-                alignment="center",
-            ),
-            "Model": st.column_config.TextColumn(
-                "Model",
-                alignment="center",
-            ),
-            **{
-                column: st.column_config.TextColumn(
-                    column,
-                    alignment="center",
-                )
-                for column in metric_columns
-            }
-        },
-        width="stretch",
+    styled_metrics_df = (
+        metrics_display_df.style
+        .set_properties(**{"text-align": "center"})
+        .set_table_styles([
+            {"selector": "th", "props": [("text-align", "center")]},
+            {"selector": "td", "props": [("text-align", "center")]},
+        ])
     )
+    st.table(styled_metrics_df)
     st.bar_chart(metrics_df.set_index("Model"))
 
     st.markdown(
