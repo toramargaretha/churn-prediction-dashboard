@@ -268,7 +268,11 @@ elif menu == "Ringkasan Model":
         hide_index=True,
         width="stretch",
     )
-    st.bar_chart(metrics_df.set_index("Model"))
+    st.bar_chart(
+        metrics_df.set_index("Model"),
+        stack=False,
+        sort=False,
+    )
 
     st.markdown(
         "Model **XGBoost** dipilih sebagai model utama dalam dashboard ini "
