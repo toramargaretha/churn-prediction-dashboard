@@ -262,7 +262,12 @@ elif menu == "Ringkasan Model":
             {"selector": "td", "props": [("text-align", "center")]},
         ])
     )
-    st.table(styled_metrics_df)
+    st.table(
+        styled_metrics_df,
+        border="horizontal",
+        hide_index=True,
+        width="stretch",
+    )
     st.bar_chart(metrics_df.set_index("Model"))
 
     st.markdown(
